@@ -19,8 +19,8 @@
  <date>2009-04-24</date>
  <time>15:54:35</time>
  <version>
-  <release>1.0.1</release>
-  <api>1.0.1</api>
+  <release>1.0.2</release>
+  <api>1.0.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -51,6 +51,10 @@
        <file role="data" name="demote.png" />
       </dir>
      </dir>
+    </dir>
+    <dir name="css">
+     <!-- css -->
+     <file role="data" name="sortable.css" />
     </dir>
    </dir>
   </dir>
@@ -84,7 +88,7 @@
    <date>2009-04-24</date>
    <license uri="http://www.symfony-project.org/license">MIT license</license>
    <notes>
-   * Initial creation of plugin
+   * minor updates
    </notes>
   </release>
  </changelog>
