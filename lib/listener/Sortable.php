@@ -42,8 +42,9 @@ class Doctrine_Template_Listener_Sortable extends Doctrine_Record_Listener
    */
   public function preInsert(Doctrine_Event $event)
   {
+    $fieldName = $this->_options['name'];
     $object = $event->getInvoker();
-    $object->position = $object->getFinalPosition()+1;
+    $object->$fieldName = $object->getFinalPosition()+1;
   }
 
 
@@ -55,14 +56,15 @@ class Doctrine_Template_Listener_Sortable extends Doctrine_Record_Listener
    */  
   public function postDelete(Doctrine_Event $event)
   {
+    $fieldName = $this->_options['name'];
     $object = $event->getInvoker();
-    $position = $object->position;
+    $position = $object->$fieldName;
 
-    $q = Doctrine_Query::create()
-                       ->update(get_class($object))
-                       ->set('position', 'position - ?', '1')
-                       ->where('position > ' . $position)
-                       ->orderBy($this->_options['name']);
+    $q = $object->getTable()->createQuery()
+                            ->update(get_class($object))
+                            ->set($fieldName, $fieldName.' - ?', '1')
+                            ->where($fieldName.' > ' . $position)
+                            ->orderBy($fieldName);
 
     foreach ($this->_options['uniqueBy'] as $field)
     {
