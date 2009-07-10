@@ -95,8 +95,10 @@ Example Usage With Admin Generator
 
         [yml]
         object_actions:
-          promote:      { name: Promote, action: promote,  icon: sortable/icons/promote.png  }
-          demote:       { name: Demote, action: demote,  icon: sortable/icons/demote.png  }
+          promote:
+            action: promote
+          demote:
+            action: demote
           _edit:        -
           _delete:      -
           

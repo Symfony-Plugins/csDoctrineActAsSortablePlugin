@@ -40,12 +40,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
   {
     $this->_options = Doctrine_Lib::arrayDeepMerge($this->_options, $options);
   }
-
-
-  public function setup()
-  {
-  }
-
+  
 
   /**
    * Set table definition for sortable behavior
@@ -89,11 +84,10 @@ class Doctrine_Template_Sortable extends Doctrine_Template
    */
   public function demote()
   {
-    $fieldName = $this->_options['name'];
     $object = $this->getInvoker();       
-    $position = $object->$fieldName;
+    $position = $object->get($this->_options['name']);
     
-    if ($object->$fieldName < $object->getFinalPosition())
+    if ($position < $object->getFinalPosition())
     {
       $object->moveToPosition($position + 1);
     }
@@ -107,11 +101,10 @@ class Doctrine_Template_Sortable extends Doctrine_Template
    */
   public function promote()
   {
-    $fieldName = $this->_options['name'];
     $object = $this->getInvoker();       
-    $position = $object->$fieldName;
+    $position = $object->get($this->_options['name']);
     
-    if ($object->$fieldName > 1)
+    if ($position > 1)
     {
       $object->moveToPosition($position - 1);
     }
@@ -149,26 +142,23 @@ class Doctrine_Template_Sortable extends Doctrine_Template
    */
   public function moveToPosition($newPosition)
   {
-    $fieldName = $this->_options['name'];
-    $setPosition = 'set'.$this->_options['name'];
-    
     if (!is_int($newPosition))
     {
       throw new Doctrine_Exception('moveToPosition requires an Integer as the new position. Entered ' . $newPosition);
     }
 
-    $object = $this->getInvoker();       
-    $position = $object->$fieldName;
-
+    $object = $this->getInvoker();
+    $position = $object->get($this->_options['name']);
+    $connection = $object->getTable()->getConnection();
+  
+    //begin Transaction
+    $connection->beginTransaction();
+    
     // Position is required to be unique. Blanks it out before it moves others up/down.
-    if(!$object->$setPosition(null)){
-      throw new Doctrine_Exception('Failed to set the position to null on your '.get_class($object));
-    }
+    $object->set($this->_options['name'], null);
 		$object->save();
 
-    // if(!$object->save()){
-    //   throw new Doctrine_Exception('Failed to save your '.get_class($object).' with a blank position.');
-    // }    
+    
     if ($position > $newPosition)
     {
       $q = $object->getTable()->createQuery()
@@ -183,9 +173,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
         $q->addWhere($field.' = '.$object[$field]);
       }
                         
-      if(!$q->execute()){
-        throw new Doctrine_Exception('Failed to run the following query: '.$q->getSql());
-      }
+      $q->execute();
     }
     elseif ($position < $newPosition)
     {
@@ -201,18 +189,14 @@ class Doctrine_Template_Sortable extends Doctrine_Template
         $q->addWhere($field . ' = ' . $object[$field]);
       }
 
-      if(!$q->execute()){
-        throw new Doctrine_Exception('Failed to run the following query: '.$q->getSql());
-      }
+      $q->execute();
     }
     
-    if(!$object->$setPosition($newPosition)){
-      throw new Doctrine_Exception('Failed to set the position on your '.get_class($object));
-    }
+    $object->set($this->_options['name'], $newPosition);
 		$object->save();
-    // if(!$object->save()){
-    //   throw new Doctrine_Exception('Failed to save your '.get_class($object));
-    // }
+
+    // Commit Transaction
+    $connection->commit();
   }
 
 
@@ -231,19 +215,23 @@ class Doctrine_Template_Sortable extends Doctrine_Template
         - Make this a transaction.
         - Add proper error messages.
     */
-    $fieldName = $this->_options['name'];
+    $table = $this->getInvoker()->getTable(); 
+    $connection = $table->getConnection();
 
-    $class = get_class($this->getInvoker()); 
+    $connection->beginTransation();
 
     foreach ($order as $position => $id) 
     {
       $newObject = Doctrine::getTable($class)->findOneById($id);
 
-      if ($newObject->$fieldName != $position + 1)
+      if ($newObject->get($this->_options['name']) != $position + 1)
       {
         $newObject->moveToPosition($position + 1);
       }
     }
+    
+    // Commit Transaction
+    $connection->commit();
   }
 
 
@@ -259,10 +247,8 @@ class Doctrine_Template_Sortable extends Doctrine_Template
     $order = $this->formatAndCheckOrder($order);
     $object = $this->getInvoker();
 
-    $class = get_class($object); 
     $query = $object->getTable()->createQuery()
-                                ->from($class . ' od')
-                                ->orderBy('od.'.$this->_options['name'].' ' . $order);
+                                ->orderBy($this->_options['name']. ' ' . $order);
 
     return $query->execute();
   }
@@ -347,15 +333,12 @@ class Doctrine_Template_Sortable extends Doctrine_Template
    */
   public function getFinalPosition()
   {
-    $fieldName = $this->_options['name'];
     $object = $this->getInvoker();       
     
     $q = $object->getTable()->createQuery()
                             ->select($this->_options['name'])
-                            ->from(get_class($object) . ' st')
-                            ->orderBy($this->_options['name'].' desc')
-                            ->limit(1);
-
+                            ->orderBy($this->_options['name'].' desc');
+                            
    foreach($this->_options['uniqueBy'] as $field)
    {
      if(is_object($object[$field])){
@@ -366,17 +349,9 @@ class Doctrine_Template_Sortable extends Doctrine_Template
      }
    }
     
-    try
-    {
-      $last = $q->execute();
-      $position = $last[0]->$fieldName;
-    }
-    catch (Exception $e)
-    {
-      //return 0;
-      exit ($q->getSql());
-    }
-
-    return $position;
+   $last = $q->fetchOne();
+   $finalPosition = $last ? $last->get($this->_options['name']) : 0;
+   
+   return $finalPosition;
   }
 }
