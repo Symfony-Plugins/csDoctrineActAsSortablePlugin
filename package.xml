@@ -71,7 +71,7 @@
     <name>symfony</name>
     <channel>pear.symfony-project.com</channel>
     <min>1.1.0</min>
-    <max>1.2.x</max>
+    <max>1.2</max>
    </package>
   </required>
  </dependencies>
