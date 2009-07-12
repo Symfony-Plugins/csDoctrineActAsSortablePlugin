@@ -62,13 +62,13 @@ class Doctrine_Template_Listener_Sortable extends Doctrine_Record_Listener
 
     $q = $object->getTable()->createQuery()
                             ->update(get_class($object))
-                            ->set($fieldName, $fieldName.' - ?', '1')
-                            ->where($fieldName.' > ' . $position)
+                            ->set($fieldName, $fieldName . ' - ?', '1')
+                            ->where($fieldName . ' > ?', $position)
                             ->orderBy($fieldName);
 
     foreach ($this->_options['uniqueBy'] as $field)
     {
-      $q->addWhere($field . ' = ' . $object[$field]);
+      $q->addWhere($field . ' = ?', $object[$field]);
     }
 
     $q->execute();
