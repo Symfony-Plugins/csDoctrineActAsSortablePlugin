@@ -258,19 +258,19 @@ class Doctrine_Template_Sortable extends Doctrine_Template
    * Finds and returns records sorted where the parent (fk) in a specified
    * one to many relationship has the value specified
    *
-   * @param string $parent_value
+   * @param string $parentValue
    * @param string $parent_column_value
    * @param string $order
    * @return $query
    */
-  public function findAllSortedWithParentTableProxy($parent_value, $parent_column_name = null, $order = 'ASC')
+  public function findAllSortedWithParentTableProxy($parentValue, $parentColumnName = null, $order = 'ASC')
   {
     $order = $this->formatAndCheckOrder($order);
 
     $object = $this->getInvoker();
     $class  = get_class($object);
 
-    if (!$parent_column_name)
+    if (!$parentColumnName)
     {
       $parents = get_class($object->getParent());
 
@@ -284,15 +284,15 @@ class Doctrine_Template_Sortable extends Doctrine_Template
       }
       else
       {
-        $parent_column_name = $parents[0]->getType();
-        exit((string) $parent_column_name);
+        $parentColumnName = $parents[0]->getType();
+        exit((string) $parentColumnName);
         exit(print_r($parents[0]->toArray()));
       }
     }
 
     $query = $object->getTable()->createQuery()
                                 ->from($class . ' od')
-                                ->where('od.' . $parent_column_name . ' = ?', $parent_value)
+                                ->where('od.' . $parentColumnName . ' = ?', $parentValue)
                                 ->orderBy($this->_options['name'] . ' ' . $order);
 
     return $query->execute();
@@ -309,11 +309,11 @@ class Doctrine_Template_Sortable extends Doctrine_Template
   {
     $order = strtolower($order);
 
-    if ($order == 'ascending' || $order == 'asc')
+    if ('ascending' === $order || 'asc' === $order)
     {
       $order = 'ASC';
     }
-    elseif ($order == 'descending' || $order == 'desc')
+    elseif ('descending' === $order || 'desc' === $order)
     {
       $order = 'DESC';
     }
@@ -341,10 +341,12 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
    foreach($this->_options['uniqueBy'] as $field)
    {
-     if(is_object($object[$field])){
+     if(is_object($object[$field]))
+     {
        $q->addWhere($field . ' = ?', $object[$field]['id']);
      }
-     else{
+     else
+     {
        $q->addWhere($field . ' = ?', $object[$field]);
      }
    }
