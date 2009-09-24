@@ -64,19 +64,30 @@ class Doctrine_Template_Sortable extends Doctrine_Template
       $indexFields = array($this->_options['name']);
       $indexFields = array_merge($indexFields, $this->_options['uniqueBy']);
 
-      $this->index($this->_options['indexName'], array('fields' => $indexFields,
-                                                       'type'   => 'unique'));
+      $this->index($this->getSortableIndexName(), array('fields' => $indexFields, 'type' => 'unique')); 
+
     }
     elseif ($this->_options['unique'])
     {
       $indexFields = array($this->_options['name']);
-      $this->index($this->_options['indexName'], array('fields' => $indexFields,
-                                                       'type'   => 'unique'));
+      $this->index($this->getSortableIndexName(), array('fields' => $indexFields, 'type' => 'unique')); 
+
     }
 
     $this->addListener(new Doctrine_Template_Listener_Sortable($this->_options));
   }
-
+  
+  /** 
+  * Returns the name of the index to create for the position field. 
+  * 
+  * @return string 
+  */ 
+  protected function getSortableIndexName() 
+  { 
+    return sprintf('%s_%s_%s', $this->getTable()->getTableName(), $this->_options['name'], $this->_options['indexName']); 
+  } 
+  
+  
   /**
    * Demotes a sortable object to a lower position
    *
