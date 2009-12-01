@@ -59,6 +59,11 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     $this->hasColumn($name, $this->_options['type'], $this->_options['length'], $this->_options['options']);
 
+    if (!empty($this->_options['uniqueBy']) && !is_array($this->_options['uniqueBy'])) 
+    {
+      throw new sfException("Sortable option 'uniqueBy' must be an array");
+    }
+    
     if ($this->_options['uniqueIndex'] == true && ! empty($this->_options['uniqueBy']))
     {
       $indexFields = array($this->_options['name']);
