@@ -228,13 +228,13 @@ class Doctrine_Template_Sortable extends Doctrine_Template
   {
     /*
       TODO 
-        - Make this a transaction.
         - Add proper error messages.
     */
     $table = $this->getInvoker()->getTable();
+    $class  = get_class($this->getInvoker());
     $connection = $table->getConnection();
 
-    $connection->beginTransation();
+    $connection->beginTransaction();
 
     foreach ($order as $position => $id)
     {
