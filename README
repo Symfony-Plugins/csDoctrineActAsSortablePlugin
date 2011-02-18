@@ -75,17 +75,17 @@ Available Table Methods
   * sort - accepts the array created by the symfony/prototype sortableElement tag
 
         [php]
-        Doctrine::getTable('Model')->sort($order);
+        Doctrine_Core::getTable('Model')->sort($order);
 
   * findAllSorted - Accepts sort order (asc, desc)
 
         [php]
-        Doctrine::getTable('Model')->findAllSorted('ASCENDING');
+        Doctrine_Core::getTable('Model')->findAllSorted('ASCENDING');
 
   * findAllSortedWithParent - accepts the parent column name, the value, and sort order (asc, desc)
 
         [php]
-        Doctrine::getTable('Model')->findAllSortedWithParent($fk_value, $fk_name, 'ASCENDING');
+        Doctrine_Core::getTable('Model')->findAllSortedWithParent($fk_value, $fk_name, 'ASCENDING');
 
 
 Example Usage With Admin Generator
@@ -107,7 +107,7 @@ Example Usage With Admin Generator
         [php]
         public function executePromote()
         {
-          $object=Doctrine::getTable('MyModel')->findOneById($this->getRequestParameter('id'));
+          $object = Doctrine_Core::getTable('MyModel')->findOneById($this->getRequestParameter('id'));
 
 
           $object->promote();
@@ -116,7 +116,7 @@ Example Usage With Admin Generator
 
         public function executeDemote()
         {
-          $object=Doctrine::getTable('MyModel')->findOneById($this->getRequestParameter('id'));
+          $object = Doctrine_Core::getTable('MyModel')->findOneById($this->getRequestParameter('id'));
 
           $object->demote();
           $this->redirect("@moduleIndexRoute");
